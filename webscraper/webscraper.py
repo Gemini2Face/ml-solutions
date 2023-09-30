@@ -10,25 +10,25 @@ def scrape_web_page(url):
     # Extract the required information from the web page
     restaurant_name = soup.find("h1", class_="css-1se8maq").text.strip()
     total_reviews = soup.find("a", class_="css-19v1rkv").text.strip()
-    
+    rating = soup.find("span", class_="css-1fdy0l5").text.strip()
+
     reviews = []
     review_elements = soup.find_all("li", class_="css-1q2nwpv")
     
     for review_element in review_elements:
         review_text = review_element.find("p").text.strip()
         reviewer = review_element.find("span").text.strip()
-        #rating = review_element.find("span", class_="rating").text.strip()
         
         review = {
             "review_text": review_text,
             "reviewer": reviewer,
-            #"rating": rating
         }
         reviews.append(review)
     print(restaurant_name)
     print(total_reviews)
     print(reviews)
-    return restaurant_name, total_reviews, reviews
+    print(rating)
+    return restaurant_name, total_reviews, rating, reviews
 
 def clean_data(data):
     # Clean the restaurant name
@@ -36,10 +36,10 @@ def clean_data(data):
     
     # Clean the total reviews count
     cleaned_reviews = data[1].replace(" reviews", "").replace(",", "")
-    
+    clean_rating = data[2]
     # Clean each review
     cleaned_reviews_list = []
-    for review in data[2]:
+    for review in data[3]:
         cleaned_review_text = review["review_text"].replace(",", "")
         cleaned_reviewer = review["reviewer"].replace(",", "")
         #cleaned_rating = review["rating"].replace(" out of 5", "")
@@ -51,15 +51,15 @@ def clean_data(data):
         }
         cleaned_reviews_list.append(cleaned_review)
     
-    return cleaned_name, cleaned_reviews, cleaned_reviews_list
+    return cleaned_name, cleaned_reviews, clean_rating, cleaned_reviews_list
 
 def write_to_csv(data, filename):
     with open(filename, "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Restaurant Name", "Total Reviews", "Review Text", "Reviewer"])
+        writer.writerow(["Restaurant Name", "Total Reviews", "Rating", "Review Text", "Reviewer"])
         
-        for review in data[2]:
-            writer.writerow([data[0], data[1], review["review_text"], review["reviewer"]])
+        for review in data[3]:
+            writer.writerow([data[0], data[1], data[2],review["review_text"], review["reviewer"]])
 
 def main():
     url = input("Enter the URL of the restaurant web page: ")
